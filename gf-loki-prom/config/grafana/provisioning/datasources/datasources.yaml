@@ -1,0 +1,42 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    isDefault: true
+    uid: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    jsonData:
+      cacheLevel: "High"
+      incrementalQuerying: true
+      incrementalQueryOverlapWindow: 10m
+      defaultEditor: code
+#  - name: Thanos
+#    type: prometheus
+#    isDefault: true
+#    uid: thanos
+#    access: proxy
+#    url: http://thanos_query_frontend:19090
+#    jsonData:
+#      prometheusType: "Thanos"
+#      prometheusVersion: "0.29.0"
+#      cacheLevel: "High"
+#      incrementalQuerying: true
+#      incrementalQueryOverlapWindow: 10m
+#      defaultEditor: code
+  - name: Loki
+    type: loki
+    uid: loki
+    access: proxy
+    url: http://loki-gateway:3100
+    jsonData:
+      httpHeaderName1: "X-Scope-OrgID"
+    secureJsonData:
+      httpHeaderValue1: "fake"
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    url: redis://redis:6379
+    isDefault: false
+    uid: redis

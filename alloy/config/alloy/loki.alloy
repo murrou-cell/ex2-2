@@ -1,0 +1,47 @@
+discovery.docker "flog_scrape" {
+  host = "unix:///var/run/docker.sock"
+}
+
+loki.source.docker "default" {
+  host       = "unix:///var/run/docker.sock"
+  targets    = discovery.docker.flog_scrape.targets
+  forward_to = [loki.write.default.receiver]
+  relabel_rules = discovery.relabel.flog_scrape.rules
+}
+
+discovery.relabel "flog_scrape" {
+	targets = []
+	
+	rule {
+		source_labels = ["__meta_docker_container_name"]
+		regex         = "/(.*)"
+		target_label  = "container"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_log_stream"]
+		target_label  = "logstream"
+	}
+
+
+	rule{
+		target_label = "service"
+		source_labels = ["__meta_docker_service_name"]
+	}
+
+	rule{
+		source_labels = ["__address__"]
+		target_label = "instance"
+	}
+	
+}
+
+loki.write "default" {
+  endpoint {
+    url = sys.env("LOKI_URL") + "/loki/api/v1/push"
+	basic_auth {
+	  username = sys.env("LOKI_USER")
+	  password = sys.env("LOKI_PASSWORD")
+	}
+  }
+}

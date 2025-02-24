@@ -1,0 +1,45 @@
+
+prometheus.exporter.unix "local_system" { } // eg. node_exporter
+
+prometheus.scrape "unix" {
+  targets         = prometheus.exporter.unix.local_system.targets
+  forward_to      = [ prometheus.relabel.unix.receiver ]
+  scrape_interval = "10s"
+}
+
+
+
+prometheus.relabel "unix" {
+  forward_to = [prometheus.remote_write.default.receiver]
+
+  // Not sure if we need relabler for unix exporter
+
+  // fix host to represent the host machine not the container one
+}
+
+
+prometheus.exporter.cadvisor "cadvisor" {
+  docker_host = "unix:///var/run/docker.sock"
+
+  storage_duration = "5m"
+
+}
+
+prometheus.scrape "cadvisor" {
+  targets    = prometheus.exporter.cadvisor.cadvisor.targets
+  forward_to = [prometheus.relabel.cadvisor.receiver]
+}
+
+prometheus.relabel "cadvisor" {
+  forward_to = [prometheus.remote_write.default.receiver]
+
+  // Not sure if we need relabler for cadvisor exporter
+}
+
+
+prometheus.remote_write "default" {
+      endpoint {
+        url =  sys.env("PROMETHEUS_URL") +"/api/v1/write"
+    }
+    
+}
