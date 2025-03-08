@@ -1,21 +1,23 @@
-discovery.docker "flog_scrape" {
+
+
+discovery.docker "loki" {
   host = "unix:///var/run/docker.sock"
 }
 
 loki.source.docker "default" {
   host       = "unix:///var/run/docker.sock"
-  targets    = discovery.docker.flog_scrape.targets
+  targets    = discovery.docker.loki.targets
   forward_to = [loki.write.default.receiver]
-  relabel_rules = discovery.relabel.flog_scrape.rules
+  relabel_rules = discovery.relabel.loki.rules
 }
 
-discovery.relabel "flog_scrape" {
+discovery.relabel "loki" {
 	targets = []
 	
 	rule {
 		source_labels = ["__meta_docker_container_name"]
 		regex         = "/(.*)"
-		target_label  = "container"
+		target_label  = "container_name"
 	}
 
 	rule {
@@ -26,12 +28,59 @@ discovery.relabel "flog_scrape" {
 
 	rule{
 		target_label = "service"
-		source_labels = ["__meta_docker_service_name"]
+		source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
 	}
 
 	rule{
 		source_labels = ["__address__"]
 		target_label = "instance"
+	}
+
+	rule{
+		source_labels = ["__meta_docker_container_id"]
+		target_label = "container_id"
+	}
+
+	rule{
+		action = "replace"
+		target_label = "image"
+		replacement = constants.os
+	}
+
+	rule{
+		action = "replace"
+		target_label = "name"
+		replacement = constants.hostname
+	}
+
+	rule{
+		action = "replace"
+		target_label = "arch"
+		replacement = constants.arch
+	}
+
+	rule{
+		target_label = "docker_image"
+		source_labels = ["__meta_docker_container_label_org_opencontainers_image_source"]
+	}
+	rule{
+		target_label = "image_tag"
+		source_labels = ["__meta_docker_container_label_org_opencontainers_image_version"]
+	}
+	rule{
+		target_label = "source"
+		source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+	}
+	rule{
+		action = "replace"
+		target_label = "env"
+		replacement = sys.env("ENV")
+	}
+
+	rule{
+		action = "replace"
+		target_label = "operation"
+		replacement = ""
 	}
 	
 }

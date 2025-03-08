@@ -1,0 +1,118 @@
+// configure authorization for the ec2 discovery
+// https://grafana.com/docs/alloy/latest/reference/components/discovery/discovery.ec2/#blocks
+discovery.ec2 "ec2" {
+  region = sys.env("AWS_REGION")
+}
+prometheus.scrape "ec2" {
+  targets    = discovery.ec2.ec2.targets
+  forward_to = [prometheus.relabel.ec2.receiver]
+}
+
+prometheus.relabel "ec2" {
+    forward_to = [prometheus.remote_write.default.receiver]
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_instance_id"]
+        target_label = "instance_id"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_instance_type"]
+        target_label = "instance_type"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_availability_zone"]
+        target_label = "availability_zone"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_private_ip"]
+        target_label = "private_ip"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_public_ip"]
+        target_label = "public_ip"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_tag_Name"]
+        target_label = "instance_name"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_ami"]
+        target_label = "ami"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_architecture"]
+        target_label = "architecture"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_availability_zone_id"]
+        target_label = "availability_zone_id"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_instance_lifecycle"]
+        target_label = "instance_lifecycle"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_instance_state"]
+        target_label = "instance_state"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_ipv6_addresses"]
+        target_label = "ipv6_addresses"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_owner_id"]
+        target_label = "owner_id"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_platform"]
+        target_label = "platform"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_primary_ipv6_addresses"]
+        target_label = "primary_ipv6_addresses"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_primary_subnet_id"]
+        target_label = "primary_subnet_id"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_private_dns_name"]
+        target_label = "private_dns_name"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_public_dns_name"]
+        target_label = "public_dns_name"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_region"]
+        target_label = "region"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_subnet_id"]
+        target_label = "subnet_id"
+    }
+    rule {
+        action = "replace"
+        source_labels = ["__meta_ec2_vpc_id"]
+        target_label = "vpc_id"
+    }
+}
